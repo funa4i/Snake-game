@@ -46,8 +46,6 @@ void DrawMap(HDC hdc, int arr[71][71], int size)
             Rectangle(hdc, 20 + i * (980 / size), 20 + j * (980 / size), 20 + i * (980 / size) + (980 / size), 20 + j * (980 / size) + (980 / size));
         }
     }
-
-
 }
 
 

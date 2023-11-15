@@ -25,7 +25,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int field[FIELDSIZE][FIELDSIZE];
 int snakearr[MAXSNAKESIZE][2]{ {1, 1}, {1, 2}, {1, 3} };
-int fsize = 20;
+int fsize = 49;
 int apple_cord[2]{-1, -1};
 int score = 0;
 int napr[2]{ 0, 1 };
@@ -163,16 +163,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         add_apple(field, apple_cord, fsize);
-        SetTimer(hWnd, 1, 100, 0);
+        SetTimer(hWnd, 1, 120, 0);
         break;
     case WM_TIMER:
-        
+        UpdateWindow(hWnd);
         if (field[apple_cord[0]][apple_cord[1]] != 4)
         {
             add_apple(field, apple_cord, fsize);
         }
         fiel_update(field, snakearr, fsize, napr, pscore);
         InvalidateRect(hWnd, NULL, TRUE);
+        
         break;
     case WM_COMMAND:
         {
