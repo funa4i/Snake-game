@@ -24,8 +24,9 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int field[FIELDSIZE][FIELDSIZE];
-int snakearr[MAXSNAKESIZE][2];
-int fsize = 49;
+int snakearr[MAXSNAKESIZE][2]{ {1, 1}, {1, 2}, {1, 3} };
+int fsize = 20;
+int apple_cord[2]{-1, -1};
 int score = 0;
 int napr[2]{ 0, 1 };
 int *pscore = &score;
@@ -155,16 +156,31 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - отправить сообщение о выходе и вернуться
 //
 //
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CREATE:
+        add_apple(field, apple_cord, fsize);
+        SetTimer(hWnd, 1, 100, 0);
+        break;
+    case WM_TIMER:
+        
+        if (field[apple_cord[0]][apple_cord[1]] != 4)
+        {
+            add_apple(field, apple_cord, fsize);
+        }
+        fiel_update(field, snakearr, fsize, napr, pscore);
+        InvalidateRect(hWnd, NULL, TRUE);
+        break;
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
             // Разобрать выбор в меню:
             switch (wmId)
             {
+
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
@@ -176,21 +192,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    case WM_KEYDOWN:
+        switch (wParam)
+        {
+        case 0x50:
+            KillTimer(hWnd, 1);
+            break;
+        case 0x53:
+            SetTimer(hWnd, 1, 100, 0);
+            break;
+        case VK_LEFT:
+            napr[0] = -1;
+            napr[1] = 0;
+            break;
+        case VK_RIGHT:
+            napr[0] = 1;
+            napr[1] = 0;
+            break;
+        case VK_UP:
+            napr[0] = 0;
+            napr[1] = -1;
+            break;
+        case VK_DOWN:
+            napr[0] = 0;
+            napr[1] = 1;
+        default:
+            break;
+        }
     case WM_PAINT:
         {
             wchar_t text[20]{};
             swprintf(text, 20, L"SCORE: %d", score);
             field[30][30] = 0;
+            SetWindowPos(hWnd, NULL, 0, 0, 1920, 1080, NULL);
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
-            // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
-            SetWindowPos(hWnd, NULL, 0, 0, 1920, 1080, NULL);
+            // TODO: Добавьте сюда любой код прорисовки, использующий HDC..
             HPEN hPen = CreatePen(PS_INSIDEFRAME, 1, RGB(255, 255, 255));
-            HBRUSH hBrush = CreateSolidBrush(NULL);
+            HBRUSH hBrush = CreateSolidBrush(RGB(0, 26, 0));
             SelectObject(hdc, hBrush);
             SelectObject(hdc, hPen);
-            Rectangle(hdc, 20, 20, 1000, 1000);
             SetTextColor(hdc, RGB(255, 255, 255));
             SetBkMode(hdc, NULL);
             TextOut(hdc, 1100, 20, text, 12);

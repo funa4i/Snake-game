@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <stdlib.h>
+#include <iostream>
 #include "Snake game.h"
 #include "framework.h"
-#define NUM_PENS 4
+#define NUM_PENS 5
+void add_apple(int field[71][71], int size);
 
 void DrawMap(HDC hdc, int arr[71][71], int size)
 {
@@ -21,8 +23,13 @@ void DrawMap(HDC hdc, int arr[71][71], int size)
 
     pens[3] = CreatePen(PS_SOLID, 2, RGB(128, 22, 23));
     brushes[3] = CreateHatchBrush(HS_DIAGCROSS, RGB(100, 107, 99));
+
+    pens[4] = CreatePen(PS_SOLID, 2, RGB(143, 0, 24));
+    brushes[4] = CreateSolidBrush(RGB(128, 0, 0));
+
+
     HPEN hPen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
-    HBRUSH hBrush = CreateSolidBrush(NULL);
+    HBRUSH hBrush = CreateSolidBrush(RGB(12, 87, 5));
     SelectObject(hdc, hPen);
     SelectObject(hdc, hBrush);
     Rectangle(hdc, 19, 19, 1001, 1001);
@@ -30,7 +37,10 @@ void DrawMap(HDC hdc, int arr[71][71], int size)
     {
         for (int j = 0; j < size; j++)
         {
-
+            if (arr[i][j] == 0)
+            {
+                continue;
+            }
             SelectObject(hdc, pens[arr[i][j]]);
             SelectObject(hdc, brushes[arr[i][j]]);
             Rectangle(hdc, 20 + i * (980 / size), 20 + j * (980 / size), 20 + i * (980 / size) + (980 / size), 20 + j * (980 / size) + (980 / size));
@@ -55,8 +65,45 @@ void CreateField(int pa[71][71], int size)
 
 void fiel_update(int parrfield[71][71], int parrsnake[5000][2], int size, int napr[2], int* snakesize)
 {
-
     int flagapple = 0;
+    if (parrfield[parrsnake[*snakesize + 3 - 1][0] + napr[0]][parrsnake[*snakesize + 3- 1][1] + napr[1]] == 4)
+    {
+        flagapple++;
+    }
+    parrfield[parrsnake[0][0]][parrsnake[0][1]] = 0;
+    switch (flagapple)
+    {
+    case 0:
+        for (int i = 0; i < *snakesize + 3; i++)
+        {
+            parrsnake[i][0] = parrsnake[i + 1][0];
+            parrsnake[i][1] = parrsnake[i + 1][1];
+        }
+        parrsnake[*snakesize + 3- 1][0] = parrsnake[*snakesize + 3 - 2][0] + napr[0];
+        parrsnake[*snakesize + 3 - 1][1] = parrsnake[*snakesize + 3 - 2][1] + napr[1];
+        break;
+    case 1:
+        parrsnake[*snakesize + 3][0] = parrsnake[*snakesize + 3- 1][0] + napr[0];
+        parrsnake[*snakesize + 3][1] = parrsnake[*snakesize + 3- 1][1] + napr[1];
+        break;
+    default:
+        break;
+    }
+    *snakesize += flagapple;
+    parrfield[parrsnake[0][0]][parrsnake[0][1]] = 1;
+    parrfield[parrsnake[*snakesize + 3 - 1][0]][parrsnake[*snakesize + 3 - 1][1]] = 2;
+    parrfield[parrsnake[*snakesize + 3- 2][0]][parrsnake[*snakesize + 3 - 2][1]] = 1;
+}
 
-    
+
+void add_apple(int field[71][71], int apple_cord[2], int size)
+{
+    srand(time(NULL));
+    int y = 1 + rand() % (size - 2) , x = 1 + rand() % (size - 2);
+    if (field[y][x] == 0)
+    {
+        field[y][x] = 4;
+    }
+    apple_cord[0] = y;
+    apple_cord[1] = x;
 }
