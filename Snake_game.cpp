@@ -24,8 +24,10 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int field[FIELDSIZE][FIELDSIZE];
+int allowFsize[6]{10, 14, 20, 28, 35, 49};
+int selectsize = 0;
 int snakearr[MAXSNAKESIZE][2]{ {1, 1}, {1, 2}, {1, 3} };
-int fsize = 49;
+int fsize = 10;
 int apple_cord[2]{-1, -1};
 int score = 0;
 int napr[2]{ 0, 1 };
@@ -163,7 +165,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         add_apple(field, apple_cord, fsize);
-        SetTimer(hWnd, 1, 120, 0);
+        SetTimer(hWnd, 1, 100, 0);
         break;
     case WM_TIMER:
         UpdateWindow(hWnd);
@@ -196,8 +198,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_KEYDOWN:
         switch (wParam)
         {
+        case 0x45:
+            selectsize = (selectsize + 1) % 6;
+            keybd_event(0x52, 0x52, 0 | 0, 0);
+            break;
+        case 0x51:
+            if (selectsize - 1 < 0)
+            {
+                selectsize = 5;
+            }
+            else
+            {
+                selectsize--;
+            }
+            keybd_event(0x52, 0x52, 0 | 0, 0);
+            break;
         case 0x50:
             KillTimer(hWnd, 1);
+            break;
+        case 0x52:
+            fsize = allowFsize[selectsize];
+            KillTimer(hWnd, 1);
+            restart_game(field, snakearr, pscore);
+            napr[0] = 0;
+            napr[1] = 1;
+            InvalidateRect(hWnd, NULL, TRUE);
             break;
         case 0x53:
             SetTimer(hWnd, 1, 100, 0);
@@ -222,7 +247,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
     case WM_PAINT:
         {
-            wchar_t text[20]{};
+            wchar_t text[20]{}, textfields[30]{};
+            swprintf(textfields, 30, L"%d x %d", allowFsize[selectsize], allowFsize[selectsize]);
             swprintf(text, 20, L"SCORE: %d", score);
             field[30][30] = 0;
             SetWindowPos(hWnd, NULL, 0, 0, 1920, 1080, NULL);
@@ -237,6 +263,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetTextColor(hdc, RGB(255, 255, 255));
             SetBkMode(hdc, NULL);
             TextOut(hdc, 1100, 20, text, 12);
+            TextOut(hdc, 1100, 120, textfields, 12);
             DrawMap(hdc, field, fsize);
             EndPaint(hWnd, &ps);
         }
